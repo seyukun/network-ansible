@@ -1,0 +1,10 @@
+[Match]
+Name={{ gre_interface }}
+
+[Link]
+MTUBytes={{ gre_mtu }}
+ActivationPolicy=bound
+
+[Network]
+Address={{ gre_address }}
+BindCarrier={{ wireguard_interface }}

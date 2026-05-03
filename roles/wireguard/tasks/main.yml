@@ -1,0 +1,109 @@
+---
+- name: Install WireGuard and network tools
+  ansible.builtin.apt:
+    name:
+      - iproute2
+      - wireguard
+      - wireguard-tools
+    state: present
+    update_cache: true
+
+- name: Create systemd-networkd configuration directory
+  ansible.builtin.file:
+    path: /etc/systemd/network
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check WireGuard private key
+  ansible.builtin.stat:
+    path: "/etc/systemd/network/{{ wireguard_interface }}.key"
+  register: wireguard_private_key
+
+- name: Generate WireGuard private key
+  ansible.builtin.command:
+    cmd: wg genkey
+  register: wireguard_generated_private_key
+  changed_when: true
+  no_log: true
+  when: not wireguard_private_key.stat.exists
+
+- name: Write WireGuard private key
+  ansible.builtin.copy:
+    content: "{{ wireguard_generated_private_key.stdout }}\n"
+    dest: "/etc/systemd/network/{{ wireguard_interface }}.key"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  when: not wireguard_private_key.stat.exists
+
+- name: Read WireGuard private key
+  ansible.builtin.slurp:
+    src: "/etc/systemd/network/{{ wireguard_interface }}.key"
+  register: wireguard_private_key_content
+  no_log: true
+
+- name: Read WireGuard public key
+  ansible.builtin.command:
+    cmd: wg pubkey
+    stdin: "{{ wireguard_private_key_content.content | b64decode }}"
+  register: wireguard_public_key
+  changed_when: false
+
+- name: Check WireGuard preshared key
+  ansible.builtin.stat:
+    path: "/etc/systemd/network/{{ wireguard_interface }}.psk"
+  register: wireguard_preshared_key
+  when: inventory_hostname == wireguard_preshared_key_host
+
+- name: Generate WireGuard preshared key
+  ansible.builtin.command:
+    cmd: wg genpsk
+  register: wireguard_generated_preshared_key
+  changed_when: true
+  no_log: true
+  when: inventory_hostname == wireguard_preshared_key_host and not wireguard_preshared_key.stat.exists
+
+- name: Write WireGuard preshared key
+  ansible.builtin.copy:
+    content: "{{ wireguard_generated_preshared_key.stdout }}\n"
+    dest: "/etc/systemd/network/{{ wireguard_interface }}.psk"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  when: inventory_hostname == wireguard_preshared_key_host and not wireguard_preshared_key.stat.exists
+
+- name: Read WireGuard preshared key
+  ansible.builtin.slurp:
+    src: "/etc/systemd/network/{{ wireguard_interface }}.psk"
+  register: wireguard_preshared_key_content
+  no_log: true
+  when: inventory_hostname == wireguard_preshared_key_host
+
+- name: Configure WireGuard netdev
+  ansible.builtin.template:
+    src: wireguard.netdev.j2
+    dest: "/etc/systemd/network/10-{{ wireguard_interface }}.netdev"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart systemd-networkd
+
+- name: Configure WireGuard network
+  ansible.builtin.template:
+    src: wireguard.network.j2
+    dest: "/etc/systemd/network/10-{{ wireguard_interface }}.network"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart systemd-networkd
+
+- name: Enable systemd-networkd
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    enabled: true
+    state: started
+    daemon_reload: true

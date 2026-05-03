@@ -1,0 +1,9 @@
+.DS_Store
+.ansible/
+*.retry
+collections/
+*.log
+
+# Secrets
+*.vault
+.env

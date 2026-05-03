@@ -1,0 +1,8 @@
+---
+- name: Configure GRE over WireGuard over IPv6
+  hosts: gre_wireguard
+  become: true
+  gather_facts: false
+  roles:
+    - wireguard
+    - gre

@@ -1,0 +1,4 @@
+---
+- name: Show target device
+  ansible.builtin.debug:
+    msg: "Managing {{ inventory_hostname }} at {{ ansible_host | default('unknown host') }}"

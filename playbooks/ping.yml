@@ -1,0 +1,7 @@
+---
+- name: Check network device connectivity
+  hosts: gre_wireguard
+  gather_facts: true
+  tasks:
+    - name: Ping hosts over SSH
+      ansible.builtin.ping:
