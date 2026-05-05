@@ -4,15 +4,16 @@ Kind=wireguard
 Description={{ wireguard_description }}
 
 [WireGuard]
-PrivateKey={{ wireguard_private_key_content.content | b64decode | trim }}
-# PublicKey={{ wireguard_public_key.stdout }}
+PrivateKey={{ wireguard_private_key }}
+# PublicKey={{ wireguard_public_key }}
 ListenPort={{ wireguard_listen_port | default(wireguard_port) }}
 
 {% for peer in wireguard_peers %}
+{% set peer_allowed_ips = peer.allowed_ips | default(hostvars[peer.host].wireguard_address) %}
 [WireGuardPeer]
-PublicKey={{ hostvars[peer.host].wireguard_public_key.stdout }}
-PresharedKey={{ hostvars[wireguard_preshared_key_host].wireguard_preshared_key_content.content | b64decode | trim }}
-AllowedIPs={{ peer.allowed_ips | join(", ") if peer.allowed_ips is sequence and peer.allowed_ips is not string else peer.allowed_ips }}
-Endpoint=[{{ hostvars[peer.host].ansible_host }}]:{{ hostvars[peer.host].wireguard_listen_port | default(wireguard_port) }}
+PublicKey={{ hostvars[peer.host].wireguard_public_key }}
+PresharedKey={{ wireguard_preshared_keys[peer.host] }}
+AllowedIPs={{ peer_allowed_ips | join(", ") if peer_allowed_ips is sequence and peer_allowed_ips is not string else peer_allowed_ips }}
+Endpoint=[{{ peer.ip | default(hostvars[peer.host].ansible_host) }}]:{{ hostvars[peer.host].wireguard_listen_port | default(wireguard_port) }}
 PersistentKeepalive={{ peer.persistent_keepalive | default(wireguard_persistent_keepalive) }}
 {% endfor %}
