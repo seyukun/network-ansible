@@ -7,7 +7,7 @@ Kind=wireguard
 PrivateKeyFile=/etc/systemd/network/{{ wireguard_interface }}.key
 ListenPort={{ wireguard_port }}
 
-{% for peer_host in groups["network"] | difference([inventory_hostname]) %}
+{% for peer_host in ansible_play_hosts_all | difference([inventory_hostname]) %}
 {% set peer = hostvars[peer_host] %}
 {% set wireguard_l_psk_seed = wireguard_psk_seed if inventory_hostname < peer_host else peer.wireguard_psk_seed %}
 {% set wireguard_r_psk_seed = wireguard_psk_seed if inventory_hostname >= peer_host else peer.wireguard_psk_seed %}
