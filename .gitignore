@@ -1,11 +1,3 @@
-.DS_Store
-.ansible/
-*.retry
-collections/
-*.log
-
-# Secrets
-*.vault
-.env
-.config/wireguard/*.psk
-.config/generated/wireguard.yaml
+.venv
+.ansible
+AGENT.md

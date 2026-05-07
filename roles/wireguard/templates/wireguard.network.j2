@@ -5,4 +5,6 @@ Name={{ wireguard_interface }}
 MTUBytes={{ wireguard_mtu }}
 
 [Network]
-Address={{ wireguard_address }}
+{% for address in wireguard_addresses %}
+Address={{ address }}{{ wireguard_subnet_size }}
+{% endfor %}

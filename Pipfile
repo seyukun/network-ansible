@@ -6,14 +6,9 @@ name = "pypi"
 [packages]
 ansible = "*"
 ansible-dev-tools = "*"
+netaddr = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.10"
-
-[scripts]
-inventory = "ansible-inventory --graph"
-syntax = "ansible-playbook playbooks/site.yml --syntax-check"
-ping = "ansible-playbook playbooks/ping.yml"
-site = "ansible-playbook playbooks/site.yml"
