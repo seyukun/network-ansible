@@ -9,17 +9,14 @@ ListenPort={{ wireguard_port }}
 
 {% for peer_host in groups["network"] | difference([inventory_hostname]) %}
 {% set peer = hostvars[peer_host] %}
-{% set wireguard_left_psk_seed = wireguard_psk_seed if inventory_hostname < peer_host else peer.wireguard_psk_seed %}
-{% set wireguard_right_psk_seed = peer.wireguard_psk_seed if inventory_hostname < peer_host else wireguard_psk_seed %}
-{% set wireguard_preshared_key = lookup("ansible.builtin.pipe", "printf '%s%s' " ~ (wireguard_left_psk_seed | quote) ~ " " ~ (wireguard_right_psk_seed | quote) ~ " | sha256sum | awk '{print $1}' | xxd -r -p | base64") %}
+{% set wireguard_l_psk_seed = wireguard_psk_seed if inventory_hostname < peer_host else peer.wireguard_psk_seed %}
+{% set wireguard_r_psk_seed = wireguard_psk_seed if inventory_hostname >= peer_host else peer.wireguard_psk_seed %}
+{% set wireguard_psk = lookup("ansible.builtin.pipe", "printf '%s%s' " ~ (wireguard_l_psk_seed | quote) ~ " " ~ (wireguard_r_psk_seed | quote) ~ " | sha256sum | awk '{print $1}' | xxd -r -p | base64") %}
 [WireGuardPeer]
 PublicKey={{ peer.wireguard_public_key }}
-PresharedKey={{ wireguard_preshared_key }}
-AllowedIPs={{ peer.wireguard_addresses | map("regex_replace", "$", "/32") | join(", ") }}
-{% if peer.wireguard_endpoint | ansible.utils.ipv4 %}
-Endpoint={{ peer.wireguard_endpoint }}:{{ peer.wireguard_port }}
-{% else %}
-Endpoint=[{{ peer.wireguard_endpoint }}]:{{ peer.wireguard_port }}
-{% endif %}
+PresharedKey={{ wireguard_psk }}
+AllowedIPs={{ peer.wireguard_addresses | map(attribute="ip") | zip(peer.wireguard_addresses | map(attribute="prefix")) | map("join", "/") | join(", ") }}
+Endpoint={{ peer.wireguard_endpoint if peer.wireguard_endpoint | ansible.utils.ipv4 else "[" ~ peer.wireguard_endpoint ~ "]" }}:{{ peer.wireguard_port }}
 PersistentKeepalive={{ peer.wireguard_persistent_keepalive }}
+
 {% endfor %}

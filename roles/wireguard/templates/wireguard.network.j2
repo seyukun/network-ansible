@@ -6,5 +6,5 @@ MTUBytes={{ wireguard_mtu }}
 
 [Network]
 {% for address in wireguard_addresses %}
-Address={{ address }}{{ wireguard_subnet_size }}
+Address={{ address.ip }}/{{ address.prefix }}
 {% endfor %}
