@@ -1,0 +1,7 @@
+---
+- name: Configure network hosts
+  hosts: network
+  become: true
+  roles:
+    - common
+    - wireguard

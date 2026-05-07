@@ -2,3 +2,7 @@
 - name: Show target device
   ansible.builtin.debug:
     msg: "Managing {{ inventory_hostname }} at {{ ansible_host | default('unknown host') }}"
+
+- name: Apt update
+  ansible.builtin.apt:
+    update_cache: true

@@ -11,7 +11,12 @@ ListenPort={{ wireguard_port }}
 {% set peer = hostvars[peer_host] %}
 {% set wireguard_l_psk_seed = wireguard_psk_seed if inventory_hostname < peer_host else peer.wireguard_psk_seed %}
 {% set wireguard_r_psk_seed = wireguard_psk_seed if inventory_hostname >= peer_host else peer.wireguard_psk_seed %}
-{% set wireguard_psk = lookup("ansible.builtin.pipe", "printf '%s%s' " ~ (wireguard_l_psk_seed | quote) ~ " " ~ (wireguard_r_psk_seed | quote) ~ " | sha256sum | awk '{print $1}' | xxd -r -p | base64") %}
+{% set wireguard_psk = lookup("ansible.builtin.pipe", "
+{
+    printf '%s' " ~ (wireguard_l_psk_seed | quote) ~ " | base64 -d
+    printf '%s' " ~ (wireguard_r_psk_seed | quote) ~ " | base64 -d
+} | sha256sum | awk '{print $1}' | xxd -r -p | base64
+") %}
 [WireGuardPeer]
 PublicKey={{ peer.wireguard_public_key }}
 PresharedKey={{ wireguard_psk }}

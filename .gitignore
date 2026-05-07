@@ -1,3 +1,5 @@
 .venv
 .ansible
-AGENT.md
+.vault-pass
+.ansible-vault
+.ansible-vault-pass
