@@ -9,11 +9,5 @@ MTUBytes={{ wireguard_mtu }}
 Address={{ address.ip }}/{{ address.prefix }}
 {% endfor %}
 
-{% for peer_host in groups["network"] | difference([inventory_hostname]) %}
-{% set peer = hostvars[peer_host] %}
-{% for address in peer.wireguard_addresses %}
 [Route]
-Destination={{ address.ip }}/{{ address.prefix }}
-
-{% endfor %}
-{% endfor %}
+Destination={{ wireguard_subnet.ip }}/{{ wireguard_subnet.prefix }}
