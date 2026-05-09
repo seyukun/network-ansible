@@ -1,4 +1,5 @@
 {
   "ansible.python.interpreterPath": "./.venv/bin/python",
-  "ansible.validation.lint.path": "./.venv/bin/ansible-lint"
+  "ansible.validation.lint.path": "./.venv/bin/ansible-lint",
+  "ansibleVault.keyfile": ".vault-pass"
 }
