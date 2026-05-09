@@ -81,12 +81,7 @@
     group: systemd-network
     mode: "0640"
 
-- name: Reload systemd-networkd configuration
-  ansible.builtin.command:
-    cmd: networkctl reload
-  changed_when: true
-
-- name: Bring up WireGuard interface
-  ansible.builtin.command:
-    cmd: "networkctl up {{ wireguard_interface }}"
-  changed_when: true
+- name: Restart systemd-networkd
+  ansible.builtin.systemd_service:
+    name: systemd-networkd
+    state: restarted
