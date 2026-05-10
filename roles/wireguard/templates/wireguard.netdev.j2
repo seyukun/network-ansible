@@ -5,15 +5,15 @@ Kind=wireguard
 
 [WireGuard]
 PrivateKeyFile=/etc/systemd/network/{{ wireguard_interface }}.key
-ListenPort={{ wireguard_port }}
+ListenPort={{ wireguard.port }}
 
 {% for peer_host in ansible_play_hosts_all | difference([inventory_hostname]) %}
 {% set peer = hostvars[peer_host] %}
 [WireGuardPeer]
-PublicKey={{ peer.wireguard_public_key }}
+PublicKey={{ peer.wireguard.public_key }}
 PresharedKeyFile=/etc/systemd/network/{{ wireguard_interface }}-{{ peer_host | regex_replace('[^A-Za-z0-9_.-]', '_') }}.psk
-AllowedIPs={{ peer.wireguard_addresses | map(attribute="ip") | zip(peer.wireguard_addresses | map(attribute="prefix")) | map("join", "/") | join(", ") }}
-Endpoint={{ peer.wireguard_endpoint if peer.wireguard_endpoint | ansible.utils.ipv4 else "[" ~ peer.wireguard_endpoint ~ "]" }}:{{ peer.wireguard_port }}
-PersistentKeepalive={{ peer.wireguard_persistent_keepalive }}
+AllowedIPs={{ peer.wireguard.addresses | map(attribute="ip") | zip(peer.wireguard.addresses | map(attribute="prefix")) | map("join", "/") | join(", ") }}
+Endpoint={{ peer.wireguard.endpoint if peer.wireguard.endpoint | ansible.utils.ipv4 else "[" ~ peer.wireguard.endpoint ~ "]" }}:{{ peer.wireguard.port }}
+PersistentKeepalive={{ peer.wireguard.persistent_keepalive }}
 
 {% endfor %}

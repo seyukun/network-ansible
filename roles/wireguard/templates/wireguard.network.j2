@@ -5,7 +5,7 @@ Name={{ wireguard_interface }}
 MTUBytes={{ wireguard_mtu }}
 
 [Network]
-{% for address in wireguard_addresses %}
+{% for address in wireguard.addresses %}
 Address={{ address.ip }}/{{ address.prefix }}
 {% endfor %}
 

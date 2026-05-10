@@ -23,7 +23,7 @@
 
 - name: Store WireGuard Private Key
   ansible.builtin.copy:
-    content: "{{ wireguard_private_key }}\n"
+    content: "{{ wireguard.private_key }}\n"
     dest: "/etc/systemd/network/{{ wireguard_interface }}.key"
     owner: root
     group: systemd-network
@@ -31,7 +31,7 @@
 
 - name: Store Wireguard Public Key
   ansible.builtin.copy:
-    content: "{{ wireguard_public_key }}\n"
+    content: "{{ wireguard.public_key }}\n"
     dest: "/etc/systemd/network/{{ wireguard_interface }}.pub"
     owner: root
     group: systemd-network
@@ -39,7 +39,7 @@
 
 - name: Store Wireguard Pre Shared Key Seed
   ansible.builtin.copy:
-    content: "{{ wireguard_psk_seed }}\n"
+    content: "{{ wireguard.psk_seed }}\n"
     dest: "/etc/systemd/network/{{ wireguard_interface }}.psk.seed"
     owner: root
     group: systemd-network
@@ -49,8 +49,8 @@
   ansible.builtin.copy:
     content: |
       {%- set peer = hostvars[peer_host] -%}
-      {%- set wireguard_l_psk_seed = wireguard_psk_seed if inventory_hostname < peer_host else peer.wireguard_psk_seed -%}
-      {%- set wireguard_r_psk_seed = wireguard_psk_seed if inventory_hostname >= peer_host else peer.wireguard_psk_seed -%}
+      {%- set wireguard_l_psk_seed = wireguard.psk_seed if inventory_hostname < peer_host else peer.wireguard.psk_seed -%}
+      {%- set wireguard_r_psk_seed = wireguard.psk_seed if inventory_hostname >= peer_host else peer.wireguard.psk_seed -%}
       {{ lookup("ansible.builtin.pipe", "
       {
           printf '%s' " ~ (wireguard_l_psk_seed | quote) ~ " | base64 -d
