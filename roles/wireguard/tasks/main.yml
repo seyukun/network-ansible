@@ -24,7 +24,7 @@
 - name: Store WireGuard Private Key
   ansible.builtin.copy:
     content: "{{ wireguard.private_key }}\n"
-    dest: "/etc/systemd/network/{{ wireguard_interface }}.key"
+    dest: "/etc/systemd/network/{{ wireguard.interface }}.key"
     owner: root
     group: systemd-network
     mode: "0640"
@@ -32,7 +32,7 @@
 - name: Store Wireguard Public Key
   ansible.builtin.copy:
     content: "{{ wireguard.public_key }}\n"
-    dest: "/etc/systemd/network/{{ wireguard_interface }}.pub"
+    dest: "/etc/systemd/network/{{ wireguard.interface }}.pub"
     owner: root
     group: systemd-network
     mode: "0640"
@@ -40,7 +40,7 @@
 - name: Store Wireguard Pre Shared Key Seed
   ansible.builtin.copy:
     content: "{{ wireguard.psk_seed }}\n"
-    dest: "/etc/systemd/network/{{ wireguard_interface }}.psk.seed"
+    dest: "/etc/systemd/network/{{ wireguard.interface }}.psk.seed"
     owner: root
     group: systemd-network
     mode: "0640"
@@ -57,7 +57,7 @@
           printf '%s' " ~ (wireguard_r_psk_seed | quote) ~ " | base64 -d
       } | sha256sum | awk '{print $1}' | xxd -r -p | base64
       ") }}
-    dest: "/etc/systemd/network/{{ wireguard_interface }}-{{ peer_host | regex_replace('[^A-Za-z0-9_.-]', '_') }}.psk"
+    dest: "/etc/systemd/network/wg{{ inventory_hostname }}-{{ peer_host | regex_replace('[^A-Za-z0-9_.-]', '_') }}.psk"
     owner: root
     group: systemd-network
     mode: "0640"
@@ -68,7 +68,7 @@
 - name: Configure WireGuard netdev
   ansible.builtin.template:
     src: wireguard.netdev.j2
-    dest: "/etc/systemd/network/10-{{ wireguard_interface }}.netdev"
+    dest: "/etc/systemd/network/{{ wireguard.systemd_networkd_priority }}-{{ wireguard.interface }}.netdev"
     owner: root
     group: systemd-network
     mode: "0640"
@@ -76,7 +76,7 @@
 - name: Configure WireGuard network
   ansible.builtin.template:
     src: wireguard.network.j2
-    dest: "/etc/systemd/network/10-{{ wireguard_interface }}.network"
+    dest: "/etc/systemd/network/{{ wireguard.systemd_networkd_priority }}-{{ wireguard.interface }}.network"
     owner: root
     group: systemd-network
     mode: "0640"
