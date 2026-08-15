@@ -11,3 +11,11 @@ Address={{ address.ip }}/{{ address.prefix }}
 
 [Route]
 Destination={{ wireguard_subnet.ip }}/{{ wireguard_subnet.prefix }}
+
+{% for rule in wireguard.routing_policy_rules | default([]) %}
+[RoutingPolicyRule]
+{% for key, value in rule.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+{% endfor %}

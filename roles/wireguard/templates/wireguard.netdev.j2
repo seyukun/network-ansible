@@ -12,7 +12,14 @@ ListenPort={{ wireguard.port }}
 [WireGuardPeer]
 PublicKey={{ peer.wireguard.public_key }}
 PresharedKeyFile=/etc/systemd/network/wg{{ inventory_hostname }}-{{ peer_host | regex_replace('[^A-Za-z0-9_.-]', '_') }}.psk
+{% if wireguard.allowed_ips is defined %}
+AllowedIPs={{ wireguard.allowed_ips | join(", ") }}
+{% else %}
 AllowedIPs={{ peer.wireguard.addresses | map(attribute="ip") | zip(peer.wireguard.addresses | map(attribute="prefix")) | map("join", "/") | join(", ") }}
+{% endif %}
+{% if wireguard.route_table is defined %}
+RouteTable={{ wireguard.route_table }}
+{% endif %}
 Endpoint={{ peer.wireguard.endpoint if peer.wireguard.endpoint | ansible.utils.ipv4 else "[" ~ peer.wireguard.endpoint ~ "]" }}:{{ peer.wireguard.port }}
 PersistentKeepalive={{ peer.wireguard.persistent_keepalive }}
 

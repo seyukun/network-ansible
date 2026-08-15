@@ -102,3 +102,20 @@ peer 間 PSK は、各 host の `wireguard_psk_seed` を host 名の辞書順で
 ```
 
 host 名が小さい方の seed を左辺、大きい方の seed を右辺として扱うため、両 peer で同じ PSK になります。
+
+### Peer routes
+
+ローカルホストの `wireguard.allowed_ips` を指定すると、peer の `addresses` から生成される `AllowedIPs` より優先されます。
+`wireguard.route_table` を指定すると `[WireGuardPeer]` の `RouteTable` に設定されます。
+
+```yaml
+wireguard:
+  allowed_ips:
+    - 172.16.42.2/32
+    - 10.0.0.0/8
+  route_table: "off"
+  routing_policy_rules:
+    - From: 172.16.42.1/32
+      Table: 100
+      Priority: 100
+```
